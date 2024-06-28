@@ -1,0 +1,24 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[lfs]
+	repositoryformatversion = 0
+[remote "origin"]
+	url = https://github.com/BSIT-PAUL/Exambot.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+[gui]
+	wmstate = normal
+	geometry = 1109x563+216+240 216 255
+[remote "origin1"]
+	url = git@github.com:BSIT-PAUL/EXAMBOT-AI-POWERED-EXAM-GENERATOR-for-BatState-U-Arasof-Nasugbu.git
+	fetch = +refs/heads/*:refs/remotes/origin1/*
+[remote "origin2"]
+	url = https://github.com/BSIT-PAUL/EXAMBOT-AI-POWERED-EXAM-GENERATOR-for-BatState-U-Arasof-Nasugbu.git
+	fetch = +refs/heads/*:refs/remotes/origin2/*
