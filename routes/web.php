@@ -15,6 +15,7 @@ use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\TopicController;
 
 use App\Http\Controllers\InvoiceController;
 /*
@@ -192,8 +193,13 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
     // });
     
     Route::post('/upload-cis', [CourseController::class, 'uploadCIS'])->name('upload.cis');
-    
-    
+    Route::get('/faculty/tos', [CourseController::class, 'showCourseData'])->name('faculty/tos');
+
+
+
+
+Route::post('/save-topic', [TopicController::class, 'store'])->name('save_topic');
+
 
 Route::get('/exam', function () {
     return view('exam.exam');
