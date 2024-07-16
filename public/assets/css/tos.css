@@ -1,271 +1,139 @@
-    
-@media print {
-    html {
-        height: 100%
-      }
-      
-      body {
-        background-color: #f7f7fa;
-        color: #333;
-        font-family: roboto, sans-serif;
-        font-size: 15px;
-        height: 100%;
-        line-height: 1.5;
-        overflow-x: hidden
-      }
-      
-    .TOS {
-        font-family: 'Times New Roman', Times, serif;
-        margin: 0 auto;
-    }
-    .headers {
-        display: flex;
-        align-items: center;
-        text-align: center;        
-        margin-left: auto;
-        margin-inline:auto;
-        margin-right: auto;
-        max-width: fit-content;
-        justify-content: center
-    }
-    .headers img {
-        width: 120px;
-    }
-    .border-headers {
-        border-bottom: 2px solid #000;
-    }
-    .headers div {
-        text-align: center;
-    }
-    .headers h1, .headers h2, .headers h3 {
-    }
-    .thead-signature .p-date{
-        text-align: left;
-    }
-    .headers p {
-        margin: 0;
-    }
-    .BSU {
-        font-size: 25px;
-    }
-    .TNEU {
-        color: red;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 15px;
-    }
-    .assessment {
-        font-size: 25px;
-    }
-    .address .tel {
-        font-size: 10px;
-    }
-    .Exams p {
-        text-align: center;
-        margin: 0;
-    }
-    .ROP .campus .emails .SPECIFICATIONS .sem {
-        font-size: 12px;
-    }
-    
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        
-    }
-    th, td {
-        border: 1px solid #000;
-        padding: 5px;
-        text-align: center;
-    }
-    th {
-        background-color: #DDEBF7;
-        border: 2px solid black;
-    }
-    br {
-        border-bottom: 2px solid #000;
-    }
-    .Totals th{
-        border: 2px solid black;
-        background-color: white;
-    }
-    .signature-section {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        margin-bottom: 40px;
-    }
-    .signature-section thead tr {
-        border: 2px solid black;
-        padding: 10px;
-    }
-    .signature-section th {
-        background-color: #d9e2f3;
-    }
-    .signature-section td {
-        background-color: #ffffff;
-        text-align: center;
-    }
-    .add-table-items{
-        border: 2px solid black;
-
-    }
-    .tbody-signature tr, .tbody-signature td {
-        border: none;
-        text-align: left;
-        
-    }
-    .first {
-        background-color: #ffffff;
-        text-align: left;
-        font-size: 15px;
-    }
-    .details {
-        text-align: left;
-        margin-bottom: 10px;
-    }
-    .footer span {
-        display: block;
-        margin-top: 10px;
-    }
-    select {
-    border: 0px;
-    outline: 0px;
-    font-size: 25px;
-    display: block;
-margin: 0 auto;
-font-weight: bold;
-text-align: center;
-    text-align-last: center;
-    -moz-text-align-last: center;
-
+/* General Styles */
+.TOS {
+    font-family: 'Times New Roman', Times, serif;
+    margin-top: 0;
+    padding-top: 0;
 }
 
+/* Header Styles */
+.headers {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 0 auto;
+    max-width: fit-content;
+    justify-content: center;
 }
-    
-    .TOS {
-        font-family: 'Times New Roman', Times, serif;
-        margin: 0 auto;
-    }
-    .headers {
-        display: flex;
-        align-items: center;
-        text-align: center;        
-        margin-left: auto;
-        margin-inline:auto;
-        margin-right: auto;
-        max-width: fit-content;
-        justify-content: center
-    }
-    .headers img {
-        width: 120px;
-    }
-    .border-headers {
-        border-bottom: 2px solid #000;
-    }
-    .headers div {
-        text-align: center;
-    }
-    .headers h1, .headers h2, .headers h3 {
-    }
-    .thead-signature .p-date{
-        text-align: left;
-    }
-    .headers p {
-        margin: 0;
-    }
-    .BSU {
-        font-size: 25px;
-    }
-    .TNEU {
-        color: red;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 15px;
-    }
-    .assessment {
-        font-size: 25px;
-    }
-    .address .tel {
-        font-size: 10px;
-    }
-    .Exams p {
-        text-align: center;
-        margin: 0;
-    }
-    .ROP .campus .emails .SPECIFICATIONS .sem {
-        font-size: 12px;
-    }
-    
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        
-    }
-    th, td {
-        border: 1px solid #000;
-        padding: 5px;
-        text-align: center;
-    }
-    th {
-        background-color: #DDEBF7;
-        border: 2px solid black;
-    }
-    br {
-        border-bottom: 2px solid #000;
-    }
-    .Totals th{
-        border: 2px solid black;
-        background-color: white;
-    }
-    .signature-section {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        margin-bottom: 40px;
-    }
-    .signature-section thead tr {
-        border: 2px solid black;
-        padding: 10px;
-    }
-    .signature-section th {
-        background-color: #d9e2f3;
-    }
-    .signature-section td {
-        background-color: #ffffff;
-        text-align: center;
-    }
-    .add-table-items{
-        border: 2px solid black;
 
-    }
-    .tbody-signature tr, .tbody-signature td {
-        border: none;
-        text-align: left;
-        
-    }
-    .first {
-        background-color: #ffffff;
-        text-align: left;
-        font-size: 15px;
-    }
-    .details {
-        text-align: left;
-        margin-bottom: 10px;
-    }
-    .footer span {
-        display: block;
-        margin-top: 10px;
-    }
-    select {
-    border: 0px;
-    outline: 0px;
+.headers img {
+    width: 120px;
+}
+
+.border-headers {
+    border-bottom: 2px solid #000;
+}
+
+.headers div {
+    text-align: center;
+}
+
+.headers p {
+    margin: 0;
+}
+
+.BSU {
     font-size: 25px;
+}
+
+.TNEU {
+    color: red;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+}
+
+.assessment {
+    font-size: 25px;
+}
+
+.address .tel {
+    font-size: 10px;
+}
+
+.Exams p {
+    text-align: center;
+    margin: 0;
+}
+
+.ROP, .campus, .emails, .SPECIFICATIONS, .sem {
+    font-size: 12px;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #000;
+    padding: 5px;
+    text-align: center;
+}
+
+th {
+    background-color: #DDEBF7;
+    border: 2px solid black;
+}
+
+.Totals th {
+    border: 2px solid black;
+    background-color: white;
+}
+
+.add-table-items {
+    border: 2px solid black;
+}
+
+/* Signature Section Styles */
+.signature-section {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0 40px;
+}
+
+.signature-section thead tr {
+    border: 2px solid black;
+    padding: 10px;
+}
+
+.signature-section th {
+    background-color: #d9e2f3;
+}
+
+.signature-section td {
+    text-align: center;
+}
+
+.thead-signature .p-date {
+    text-align: left;
+}
+
+.tbody-signature tr, .tbody-signature td {
+    border: none;
+    text-align: left;
+}
+
+.first {
+    text-align: left;
+    font-size: 15px;
+}
+
+/* Footer Styles */
+.footer span {
     display: block;
-margin: 0 auto;
-font-weight: bold;
-text-align: center;
+    margin-top: 10px;
+}
+
+/* Select Input Styles */
+select {
+    border: 0;
+    outline: 0;
+    font-size: 25px;
+    font-weight: bold;
+    text-align: center;
     text-align-last: center;
     -moz-text-align-last: center;
-
+    display: block;
+    margin: 0 auto;
 }

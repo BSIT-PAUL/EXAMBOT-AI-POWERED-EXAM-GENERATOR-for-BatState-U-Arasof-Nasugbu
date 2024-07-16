@@ -1,0 +1,50 @@
+@media print {
+  @page {
+      size: legal landscape;
+      margin: 0;
+  }
+  * {
+      margin: 0;
+      padding: 0;
+  }
+
+  body {
+      visibility: hidden;
+      top: 0;
+      zoom: 82%;
+  }
+  .TOS {
+      visibility: visible;
+      position: absolute;
+      left: 0;
+      top: 0;
+      padding: 0;
+      margin-left: 1%;
+      margin-right: 1%;
+      margin-bottom: 0;
+  }
+  .page-wrapper, 
+  .content.container-fluid, 
+  .page-header, 
+  .row.align-items-center {
+      margin: 0;
+      padding: 0;
+  }
+  .signature-section {
+      margin: 0;
+      padding: 0;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+  }
+  .signature-section p {
+      margin: 0;
+      padding: 0;
+  }
+  .signature-section .thead-signature td,
+  .signature-section .tbody-signature td {
+      vertical-align: top;
+  }
+}
