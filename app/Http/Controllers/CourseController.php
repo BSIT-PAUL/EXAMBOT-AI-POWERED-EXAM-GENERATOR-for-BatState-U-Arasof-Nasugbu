@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -9,11 +8,27 @@ use Smalot\PdfParser\Parser;
 use App\Models\CourseInformation;
 use App\Models\CourseChapters;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\TableOfSpecification;
+use App\Models\FileUpload;
+use App\Services\OpenAIService;
+use App\Models\Remembering;
+
 
 class CourseController extends Controller
 {
+
+    protected $openAIService;
+    public function __construct(OpenAIService $openAIService)
+    {
+        $this->openAIService = $openAIService;
+    }
+
+    public function tosindex() 
+    {
+        $fileUploads = FileUpload::get();
+        return view('faculty/tos', ['fileUploads' => $fileUploads]);
+    }
+
     private function ocrPdf($inputPath, $outputPath)
     {
         $command = escapeshellcmd("ocrmypdf --force-ocr --output-type pdfa \"$inputPath\" \"$outputPath\"");
@@ -28,6 +43,7 @@ class CourseController extends Controller
             throw new \Exception("Failed to convert PDF to OCR: " . implode("\n", $output));
         }
     }
+
     public function uploadCIS(Request $request)
     {
         $request->validate([
@@ -146,77 +162,151 @@ class CourseController extends Controller
                 'topic_outcomes' => $chapter['Topic Outcomes'],
             ]);
         }
-        
     }
-    
+
     public function showCourseData()
+    {
+        $userId = Auth::id(); // Get the current user's ID
+
+        // Get the latest course information uploaded by the current user
+        $courseInfo = CourseInformation::where('user_id', $userId)
+            ->latest() // Order by creation date
+            ->first(); // Get the latest one
+
+        // If courseInfo is null, initialize an empty collection for courseChapters
+        $courseChapters = $courseInfo ? CourseChapters::where('course_information_id', $courseInfo->id)->get() : collect();
+
+        // Get the latest TableOfSpecification entry for the current user
+        $latestTOS = TableOfSpecification::where('user_id', $userId)
+            ->latest() // Order by creation date
+            ->first(); // Get the latest one
+
+        // Get the created_at timestamp of the latest TableOfSpecification entry
+        $createdAt = $latestTOS ? $latestTOS->created_at : null;
+
+        // Filter TableOfSpecification entries based on the exact creation timestamp
+        $TOSinfo = TableOfSpecification::where('user_id', $userId)
+            ->when($createdAt, function ($query, $createdAt) {
+                return $query->where('created_at', $createdAt);
+            })
+            ->latest()
+            ->get();
+
+        // Calculate the sums of no_of_hours_a and no_of_hours_b
+        $sum_of_hours_a = number_format($TOSinfo->sum('no_of_hours_a'));
+        $sum_of_hours_b = number_format($TOSinfo->sum('no_of_hours_b'), 2);
+        $sum_of_weight = number_format($TOSinfo->sum('weight'), 2);
+        $sum_of_remembering = $TOSinfo->sum('remembering');
+        $sum_of_understanding = $TOSinfo->sum('understanding');
+        $sum_of_applying = $TOSinfo->sum('applying');
+        $sum_of_analyzing = $TOSinfo->sum('analyzing');
+        $sum_of_evaluating = $TOSinfo->sum('evaluating');
+        $sum_of_creating = $TOSinfo->sum('creating');
+
+        $sum_of_remembering_percentage = number_format($TOSinfo->sum('remembering_percentage'), 2);
+        $sum_of_understanding_percentage = number_format($TOSinfo->sum('understanding_percentage'), 2);
+        $sum_of_applying_percentage = number_format($TOSinfo->sum('applying_percentage'), 2);
+        $sum_of_analyzing_percentage = number_format($TOSinfo->sum('analyzing_percentage'), 2);
+        $sum_of_evaluating_percentage = number_format($TOSinfo->sum('evaluating_percentage'), 2);
+        $sum_of_creating_percentage = number_format($TOSinfo->sum('creating_percentage'), 2);
+
+        return view('faculty.tos', [
+            'courseInfo' => $courseInfo,
+            'courseChapters' => $courseChapters,
+            'TOSinfo' => $TOSinfo,
+            'sum_of_hours_a' => $sum_of_hours_a,
+            'sum_of_hours_b' => $sum_of_hours_b,
+            'sum_of_weight' => $sum_of_weight,
+            'sum_of_remembering' => $sum_of_remembering,
+            'sum_of_understanding' => $sum_of_understanding,
+            'sum_of_applying' => $sum_of_applying,
+            'sum_of_analyzing' => $sum_of_analyzing,
+            'sum_of_evaluating' => $sum_of_evaluating,
+            'sum_of_creating' => $sum_of_creating,
+            'sum_of_remembering_percentage' => $sum_of_remembering_percentage,
+            'sum_of_understanding_percentage' => $sum_of_understanding_percentage,
+            'sum_of_applying_percentage' => $sum_of_applying_percentage,
+            'sum_of_analyzing_percentage' => $sum_of_analyzing_percentage,
+            'sum_of_evaluating_percentage' => $sum_of_evaluating_percentage,
+            'sum_of_creating_percentage' => $sum_of_creating_percentage,
+        ]);
+    }
+
+    public function showExamType()
 {
     $userId = Auth::id(); // Get the current user's ID
 
-    // Get the latest course information uploaded by the current user
-    $courseInfo = CourseInformation::where('user_id', $userId)
-        ->latest() // Order by creation date
-        ->first(); // Get the latest one
-
-    // If courseInfo is null, initialize an empty collection for courseChapters
-    $courseChapters = $courseInfo ? CourseChapters::where('course_information_id', $courseInfo->id)->get() : collect();
-
-    // Get the latest TableOfSpecification entry for the current user
+    // Fetch the latest TableOfSpecification entry for the current user
     $latestTOS = TableOfSpecification::where('user_id', $userId)
         ->latest() // Order by creation date
         ->first(); // Get the latest one
 
+    if (!$latestTOS) {
+        return view('exam.examtype', [
+            'examTypes' => [],
+            'generatedAt' => null,
+        ]);
+    }
+
     // Get the created_at timestamp of the latest TableOfSpecification entry
-    $createdAt = $latestTOS ? $latestTOS->created_at : null;
+    $createdAt = $latestTOS->created_at;
 
     // Filter TableOfSpecification entries based on the exact creation timestamp
     $TOSinfo = TableOfSpecification::where('user_id', $userId)
-        ->when($createdAt, function ($query, $createdAt) {
-            return $query->where('created_at', $createdAt);
-        })
-        ->latest()
+        ->where('created_at', $createdAt)
         ->get();
 
-    // Calculate the sums of no_of_hours_a and no_of_hours_b
-    $sum_of_hours_a = number_format($TOSinfo->sum('no_of_hours_a'));
-    $sum_of_hours_b = number_format($TOSinfo->sum('no_of_hours_b'), 2);
-    $sum_of_weight = number_format($TOSinfo->sum('weight'), 2);
-    $sum_of_remembering = $TOSinfo->sum('remembering');
-    $sum_of_understanding = $TOSinfo->sum('understanding');
-    $sum_of_applying = $TOSinfo->sum('applying');
-    $sum_of_analyzing = $TOSinfo->sum('analyzing');
-    $sum_of_evaluating = $TOSinfo->sum('evaluating');
-    $sum_of_creating = $TOSinfo->sum('creating');
+    $examTypes = [];
 
-    $sum_of_remembering_percentage = number_format($TOSinfo->sum('remembering_percentage'), 2);
-    $sum_of_understanding_percentage = number_format($TOSinfo->sum('understanding_percentage'), 2);
-    $sum_of_applying_percentage = number_format($TOSinfo->sum('applying_percentage'), 2);
-    $sum_of_analyzing_percentage = number_format($TOSinfo->sum('analyzing_percentage'), 2);
-    $sum_of_evaluating_percentage = number_format($TOSinfo->sum('evaluating_percentage'), 2);
-    $sum_of_creating_percentage = number_format($TOSinfo->sum('creating_percentage'), 2);
+    foreach ($TOSinfo as $tos) {
+        $topic = $tos->topic;
+        $bloomsLevels = $this->getBloomsLevels($tos);
 
-    return view('faculty.tos', [
-        'courseInfo' => $courseInfo,
-        'courseChapters' => $courseChapters,
-        'TOSinfo' => $TOSinfo,
-        'sum_of_hours_a' => $sum_of_hours_a,
-        'sum_of_hours_b' => $sum_of_hours_b,
-        'sum_of_weight' => $sum_of_weight,
-        'sum_of_remembering' => $sum_of_remembering,
-        'sum_of_understanding' =>  $sum_of_understanding,
-        'sum_of_applying' =>$sum_of_applying,
-        'sum_of_analyzing' => $sum_of_analyzing,
-        'sum_of_evaluating' =>$sum_of_evaluating,
-        'sum_of_creating' =>$sum_of_creating,
-        'sum_of_remembering_percentage'  =>  $sum_of_remembering_percentage,
-        'sum_of_understanding_percentage'  => $sum_of_understanding_percentage,
-        'sum_of_applying_percentage'  =>  $sum_of_applying_percentage,
-        'sum_of_analyzing_percentage'  => $sum_of_analyzing_percentage,
-        'sum_of_evaluating_percentage'  =>  $sum_of_evaluating_percentage,
-        'sum_of_creating_percentage' => $sum_of_creating_percentage,
+        // Fetch the topic outcomes from the course_chapters table
+        $chapter = CourseChapters::where('main_topic', $topic)->first();
+        $topicOutcomes = $chapter ? $chapter->topic_outcomes : 'No outcomes specified';
+
+        foreach ($bloomsLevels as $level => $items) {
+            if ($items > 0) {
+                // Fetch the exam type from the database
+                $modelClass = 'App\Models\\' . ucfirst($level);
+                $examEntry = $modelClass::where('user_id', $userId)
+                    ->where('topic', $topic)
+                    ->latest() // Order by creation date
+                    ->first(); // Get the latest one
+
+                if ($examEntry) {
+                    $examTypes[$topic][] = [
+                        'level' => $level,
+                        'items' => $items,
+                        'exam_type' => $examEntry->exam_type,
+                        'topic_outcomes' => $topicOutcomes,
+                    ];
+                }
+            }
+        }
+    }
+
+    return view('exam.examtype', [
+        'examTypes' => $examTypes,
+        'generatedAt' => $createdAt->format('Y-m-d H:i'),
     ]);
 }
 
 
 
+    
+    private function getBloomsLevels($tos)
+    {
+        // Include all levels and their corresponding items
+        return [
+            'remembering' => $tos->remembering,
+            'understanding' => $tos->understanding,
+            'applying' => $tos->applying,
+            'analyzing' => $tos->analyzing,
+            'evaluating' => $tos->evaluating,
+            'creating' => $tos->creating,
+        ];
+    }
+    
 }
