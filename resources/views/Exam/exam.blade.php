@@ -28,7 +28,7 @@
                                 <div class="col-auto text-end float-end ms-auto download-grp">
             
                                         <div class="col-auto text-end float-end ms-auto download-grp">
-                                            <button type="button" class="btn btn-outline-primary me-2"><i class="fas fa-book-reader"></i> Generate Exam</button>
+                                            <button type="button" class="btn btn-outline-danger me-2"><i class="fas fa-book-reader"></i> Generate Exam</button>
                                         </div>
                                 </div>
                             </div>
