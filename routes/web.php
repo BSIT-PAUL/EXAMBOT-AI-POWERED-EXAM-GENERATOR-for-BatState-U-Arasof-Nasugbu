@@ -5,19 +5,19 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\TypeFormController;
 use App\Http\Controllers\Setting;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\FacultyController;
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TopicController;
-
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\AccountsController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -48,22 +48,11 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-// Route::group(['middleware'=>'auth'],function()
-// {
-//     Route::get('home',function()
-//     {
-//         return view('home');
-//     });
-//     Route::get('home',function()
-//     {
-//         return view('home');
-//     });
-// });
-
+// Authentication Routes
 Auth::routes();
-Route::group(['namespace' => 'App\Http\Controllers\Auth'],function()
-{
-    // ----------------------------login ------------------------------//
+
+Route::group(['namespace' => 'App\Http\Controllers\Auth'], function() {
+    // Login routes
     Route::controller(LoginController::class)->group(function () {
         Route::get('/login', 'login')->name('login');
         Route::post('/login', 'authenticate');
@@ -71,141 +60,138 @@ Route::group(['namespace' => 'App\Http\Controllers\Auth'],function()
         Route::post('change/password', 'changePassword')->name('change/password');
     });
 
-    // ----------------------------- register -------------------------//
+    // Registration routes
     Route::controller(RegisterController::class)->group(function () {
         Route::get('/register', 'register')->name('register');
-        Route::post('/register','storeUser')->name('register');    
+        Route::post('/register', 'storeUser')->name('register');    
     });
 });
+
+// Password Reset Routes
 Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
-Route::group(['namespace' => 'App\Http\Controllers'],function()
-{
-    // -------------------------- main dashboard ----------------------//
+
+// Group Routes with Auth Middleware
+Route::group(['middleware' => 'auth'], function () {
+    // Main Dashboard Routes
     Route::controller(HomeController::class)->group(function () {
-        Route::get('/home', 'index')->middleware('auth')->name('home');
-        Route::get('user/profile/page', 'userProfile')->middleware('auth')->name('user/profile/page');
-        Route::get('teacher/dashboard', 'teacherDashboardIndex')->middleware('auth')->name('teacher/dashboard');
-        Route::get('student/dashboard', 'studentDashboardIndex')->middleware('auth')->name('student/dashboard');
+        Route::get('/home', 'index')->name('home');
+        Route::get('user/profile/page', 'userProfile')->name('user/profile/page');
+        Route::get('teacher/dashboard', 'teacherDashboardIndex')->name('teacher/dashboard');
+        Route::get('student/dashboard', 'studentDashboardIndex')->name('student/dashboard');
     });
 
-    // ----------------------------- user controller ---------------------//
+    // User Management Routes
     Route::controller(UserManagementController::class)->group(function () {
-        Route::get('list/users', 'index')->middleware('auth')->name('list/users');
+        Route::get('list/users', 'index')->name('list/users');
         Route::post('change/password', 'changePassword')->name('change/password');
-        Route::get('view/user/edit/{id}', 'userView')->middleware('auth');
+        Route::get('view/user/edit/{id}', 'userView');
         Route::post('user/update', 'userUpdate')->name('user/update');
         Route::post('user/delete', 'userDelete')->name('user/delete');
-        Route::get('get-users-data', 'getUsersData')->name('get-users-data'); /** get all data users */
-
+        Route::get('get-users-data', 'getUsersData')->name('get-users-data'); // Get all user data
     });
 
-    // ------------------------ setting -------------------------------//
+    // Setting Routes
     Route::controller(Setting::class)->group(function () {
-        Route::get('setting/page', 'index')->middleware('auth')->name('setting/page');
+        Route::get('setting/page', 'index')->name('setting/page');
     });
 
-    // ------------------------ student -------------------------------//
+    // Student Routes
     Route::controller(StudentController::class)->group(function () {
-        Route::get('student/list', 'student')->middleware('auth')->name('student/list'); // list student
-        Route::get('student/grid', 'studentGrid')->middleware('auth')->name('student/grid'); // grid student
-        Route::get('student/add/page', 'studentAdd')->middleware('auth')->name('student/add/page'); // page student
-        Route::post('student/add/save', 'studentSave')->name('student/add/save'); // save record student
-        Route::get('student/edit/{id}', 'studentEdit'); // view for edit
-        Route::post('student/update', 'studentUpdate')->name('student/update'); // update record student
-        Route::post('student/delete', 'studentDelete')->name('student/delete'); // delete record student
-        Route::get('student/profile/{id}', 'studentProfile')->middleware('auth'); // profile student
+        Route::get('student/list', 'student')->name('student/list'); // List students
+        Route::get('student/grid', 'studentGrid')->name('student/grid'); // Grid students
+        Route::get('student/add/page', 'studentAdd')->name('student/add/page'); // Add student page
+        Route::post('student/add/save', 'studentSave')->name('student/add/save'); // Save student
+        Route::get('student/edit/{id}', 'studentEdit'); // Edit student
+        Route::post('student/update', 'studentUpdate')->name('student/update'); // Update student
+        Route::post('student/delete', 'studentDelete')->name('student/delete'); // Delete student
+        Route::get('student/profile/{id}', 'studentProfile'); // Student profile
     });
 
-    // ------------------------ teacher -------------------------------//
+    // Teacher Routes
     Route::controller(TeacherController::class)->group(function () {
-        Route::get('teacher/add/page', 'teacherAdd')->middleware('auth')->name('teacher/add/page'); // page teacher
-        Route::get('teacher/list/page', 'teacherList')->middleware('auth')->name('teacher/list/page'); // page teacher
-        Route::get('teacher/grid/page', 'teacherGrid')->middleware('auth')->name('teacher/grid/page'); // page grid teacher
-        Route::post('teacher/save', 'saveRecord')->middleware('auth')->name('teacher/save'); // save record
-        Route::get('teacher/edit/{user_id}', 'editRecord'); // view teacher record
-        Route::post('teacher/update', 'updateRecordTeacher')->middleware('auth')->name('teacher/update'); // update record
-        Route::post('teacher/delete', 'teacherDelete')->name('teacher/delete'); // delete record teacher
+        Route::get('teacher/add/page', 'teacherAdd')->name('teacher/add/page'); // Add teacher page
+        Route::get('teacher/list/page', 'teacherList')->name('teacher/list/page'); // List teachers
+        Route::get('teacher/grid/page', 'teacherGrid')->name('teacher/grid/page'); // Grid teachers
+        Route::post('teacher/save', 'saveRecord')->name('teacher/save'); // Save teacher
+        Route::get('teacher/edit/{user_id}', 'editRecord'); // Edit teacher
+        Route::post('teacher/update', 'updateRecordTeacher')->name('teacher/update'); // Update teacher
+        Route::post('teacher/delete', 'teacherDelete')->name('teacher/delete'); // Delete teacher
     });
 
-    // ----------------------- department -----------------------------//
+    // Department Routes
     Route::controller(DepartmentController::class)->group(function () {
-        Route::get('department/list/page', 'departmentList')->middleware('auth')->name('department/list/page'); // department/list/page
-        Route::get('department/add/page', 'indexDepartment')->middleware('auth')->name('department/add/page'); // page add department
-        Route::get('department/edit/{department_id}', 'editDepartment'); // page add department
-        Route::post('department/save', 'saveRecord')->middleware('auth')->name('department/save'); // department/save
-        Route::post('department/update', 'updateRecord')->middleware('auth')->name('department/update'); // department/update
-        Route::post('department/delete', 'deleteRecord')->middleware('auth')->name('department/delete'); // department/delete
-        Route::get('get-data-list', 'getDataList')->name('get-data-list'); // get data list
-
+        Route::get('department/list/page', 'departmentList')->name('department/list/page'); // List departments
+        Route::get('department/add/page', 'indexDepartment')->name('department/add/page'); // Add department page
+        Route::get('department/edit/{department_id}', 'editDepartment'); // Edit department
+        Route::post('department/save', 'saveRecord')->name('department/save'); // Save department
+        Route::post('department/update', 'updateRecord')->name('department/update'); // Update department
+        Route::post('department/delete', 'deleteRecord')->name('department/delete'); // Delete department
+        Route::get('get-data-list', 'getDataList')->name('get-data-list'); // Get data list
     });
 
-    // ----------------------- subject -----------------------------//
+    // Subject Routes
     Route::controller(SubjectController::class)->group(function () {
-        Route::get('subject/list/page', 'subjectList')->middleware('auth')->name('subject/list/page'); // subject/list/page
-        Route::get('subject/add/page', 'subjectAdd')->middleware('auth')->name('subject/add/page'); // subject/add/page
-        Route::get('subject/list/page', 'subjectList')->middleware('auth')->name('subject/list/page'); // subject/list/page
-        Route::post('subject/save', 'saveRecord')->name('subject/save'); // subject/save
-        Route::post('subject/update', 'updateRecord')->name('subject/update'); // subject/update
-        Route::post('subject/delete', 'deleteRecord')->name('subject/delete'); // subject/delete
-        Route::get('subject/edit/{subject_id}', 'subjectEdit'); // subject/edit/page
+        Route::get('subject/list/page', 'subjectList')->name('subject/list/page'); // List subjects
+        Route::get('subject/add/page', 'subjectAdd')->name('subject/add/page'); // Add subject page
+        Route::post('subject/save', 'saveRecord')->name('subject/save'); // Save subject
+        Route::post('subject/update', 'updateRecord')->name('subject/update'); // Update subject
+        Route::post('subject/delete', 'deleteRecord')->name('subject/delete'); // Delete subject
+        Route::get('subject/edit/{subject_id}', 'subjectEdit'); // Edit subject
     });
 
-    // ----------------------- invoice -----------------------------//
+    // Invoice Routes
     Route::controller(InvoiceController::class)->group(function () {
-        Route::get('invoice/list/page', 'invoiceList')->middleware('auth')->name('invoice/list/page'); // subjeinvoicect/list/page
-        Route::get('invoice/paid/page', 'invoicePaid')->middleware('auth')->name('invoice/paid/page'); // invoice/paid/page
-        Route::get('invoice/overdue/page', 'invoiceOverdue')->middleware('auth')->name('invoice/overdue/page'); // invoice/overdue/page
-        Route::get('invoice/draft/page', 'invoiceDraft')->middleware('auth')->name('invoice/draft/page'); // invoice/draft/page
-        Route::get('invoice/recurring/page', 'invoiceRecurring')->middleware('auth')->name('invoice/recurring/page'); // invoice/recurring/page
-        Route::get('invoice/cancelled/page', 'invoiceCancelled')->middleware('auth')->name('invoice/cancelled/page'); // invoice/cancelled/page
-        Route::get('invoice/grid/page', 'invoiceGrid')->middleware('auth')->name('invoice/grid/page'); // invoice/grid/page
-        Route::get('invoice/add/page', 'invoiceAdd')->middleware('auth')->name('invoice/add/page'); // invoice/add/page
-        Route::post('invoice/add/save', 'saveRecord')->name('invoice/add/save'); // invoice/add/save
-        Route::post('invoice/update/save', 'updateRecord')->name('invoice/update/save'); // invoice/update/save
-        Route::post('invoice/delete', 'deleteRecord')->name('invoice/delete'); // invoice/delete
-        Route::get('invoice/edit/{invoice_id}', 'invoiceEdit')->middleware('auth')->name('invoice/edit/page'); // invoice/edit/page
-        Route::get('invoice/view/{invoice_id}', 'invoiceView')->middleware('auth')->name('invoice/view/page'); // invoice/view/page
-        Route::get('invoice/settings/page', 'invoiceSettings')->middleware('auth')->name('invoice/settings/page'); // invoice/settings/page
-        Route::get('invoice/settings/tax/page', 'invoiceSettingsTax')->middleware('auth')->name('invoice/settings/tax/page'); // invoice/settings/tax/page
-        Route::get('invoice/settings/bank/page', 'invoiceSettingsBank')->middleware('auth')->name('invoice/settings/bank/page'); // invoice/settings/bank/page
+        Route::get('invoice/list/page', 'invoiceList')->name('invoice/list/page'); // List invoices
+        Route::get('invoice/paid/page', 'invoicePaid')->name('invoice/paid/page'); // Paid invoices
+        Route::get('invoice/overdue/page', 'invoiceOverdue')->name('invoice/overdue/page'); // Overdue invoices
+        Route::get('invoice/draft/page', 'invoiceDraft')->name('invoice/draft/page'); // Draft invoices
+        Route::get('invoice/recurring/page', 'invoiceRecurring')->name('invoice/recurring/page'); // Recurring invoices
+        Route::get('invoice/cancelled/page', 'invoiceCancelled')->name('invoice/cancelled/page'); // Cancelled invoices
+        Route::get('invoice/grid/page', 'invoiceGrid')->name('invoice/grid/page'); // Grid invoices
+        Route::get('invoice/add/page', 'invoiceAdd')->name('invoice/add/page'); // Add invoice page
+        Route::post('invoice/add/save', 'saveRecord')->name('invoice/add/save'); // Save invoice
+        Route::post('invoice/update/save', 'updateRecord')->name('invoice/update/save'); // Update invoice
+        Route::post('invoice/delete', 'deleteRecord')->name('invoice/delete'); // Delete invoice
+        Route::get('invoice/edit/{invoice_id}', 'invoiceEdit')->name('invoice/edit/page'); // Edit invoice
+        Route::get('invoice/view/{invoice_id}', 'invoiceView')->name('invoice/view/page'); // View invoice
+        Route::get('invoice/settings/page', 'invoiceSettings')->name('invoice/settings/page'); // Invoice settings
+        Route::get('invoice/settings/tax/page', 'invoiceSettingsTax')->name('invoice/settings/tax/page'); // Tax settings
+        Route::get('invoice/settings/bank/page', 'invoiceSettingsBank')->name('invoice/settings/bank/page'); // Bank settings
     });
 
-    // ----------------------- accounts ----------------------------//
+    // Accounts Routes
     Route::controller(AccountsController::class)->group(function () {
-        Route::get('account/fees/collections/page', 'index')->middleware('auth')->name('account/fees/collections/page'); // account/fees/collections/page
-        Route::get('add/fees/collection/page', 'addFeesCollection')->middleware('auth')->name('add/fees/collection/page'); // add/fees/collection
-        Route::post('fees/collection/save', 'saveRecord')->middleware('auth')->name('fees/collection/save'); // fees/collection/save
+        Route::get('account/fees/collections/page', 'index')->name('account/fees/collections/page'); // Account fees collections
+        Route::get('add/fees/collection/page', 'addFeesCollection')->name('add/fees/collection/page'); // Add fees collection
+        Route::post('fees/collection/save', 'saveRecord')->name('fees/collection/save'); // Save fees collection
     });
 
-    // ----------------------- Course Material upload ----------------------------//
+    // Course Material Upload Routes
+    Route::get('/recent-topics', [FileUploadController::class, 'getRecentTopics']);
 
     Route::get('faculty/fileupload', [FileUploadController::class, 'index'])->name('faculty/fileupload');
     Route::post('multiple-file-upload', [FileUploadController::class, 'multipleUpload'])->name('multiple.fileupload');
     Route::post('file-delete', [FileUploadController::class, 'destroy'])->name('file.delete');
-    
-    Route::get('faculty/tos', [FileUploadController::class, 'tosindex'])->name('faculty/tos');
+    Route::post('/delete-multiple-files', [FileUploadController::class, 'destroyMultiple'])->name('file.deleteMultiple');
 
-    // Route::get('/', function () {
-    //     return view('welcome');
-    // });
-    
+    Route::get('faculty/tos', [CourseController::class, 'showCourseData'])->name('faculty/tos');
+
     Route::post('/upload-cis', [CourseController::class, 'uploadCIS'])->name('upload.cis');
-    Route::get('/faculty/tos', [CourseController::class, 'showCourseData'])->name('faculty/tos');
+    Route::post('/save-topic', [TopicController::class, 'store'])->name('save_topic');
+    Route::get('/examtype', [CourseController::class, 'showExamType'])->name('examtype');
+
+    Route::post('/generate-exam-type-table', [TopicController::class, 'generateExamTypeTable'])->name('generate.exam.type.table');
+    Route::post('/edit-exam-type', [TopicController::class, 'editExamType'])->name('edit.exam.type');
 
 
+    Route::get('/exam', function () {
+        return view('exam.exam');
+    })->name('exam');
 
-
-Route::post('/save-topic', [TopicController::class, 'store'])->name('save_topic');
-
-
-Route::get('/exam', function () {
-    return view('exam.exam');
-})->name('exam');
-Route::get('/result', function () {
-    return view('exam.result');
-})->name('result');
-    
+    Route::get('/result', function () {
+        return view('exam.result');
+    })->name('result');
 });

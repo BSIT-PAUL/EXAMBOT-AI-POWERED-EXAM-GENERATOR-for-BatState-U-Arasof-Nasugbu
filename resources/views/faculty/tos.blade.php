@@ -1,6 +1,7 @@
 @extends('layouts.master')
 @section('content')
 <link rel="stylesheet" href="{{url('/')}}/assets/css/tos.css">
+<link rel="stylesheet" href="{{url('/')}}/assets/css/print.css" media="print">
 
 <div class="page-wrapper">
     <div class="content container-fluid">
@@ -29,16 +30,15 @@
                                     <form class="row align-items-center" method="post" action="{{ route('upload.cis') }}" enctype="multipart/form-data" id="uploadForm">
                                         @csrf
                                         <div class="col">
-                                            <input type="file" name="file" class="form-control " required>
+                                            <input type="file" name="file" class="form-control" required>
                                         </div>
                                         
                                         <div class="col-auto text-end float-end ms-auto download-grp">
                                             <button type="submit" class="btn btn-outline-danger me-2">
                                                 <i class="fas fa-download"></i> Upload CIS PDF File
                                             </button>
-                                            <a class="btn btn-outline-danger me-2" href="#" data-bs-toggle="modal" data-bs-target="#bank_details" id="btn-add-bank-details"><i class="fas fa-plus-circle me-2"></i>Generate TOS</a>
-                                            <a class="btn btn-outline-danger" href="#" data-bs-toggle="modal" data-bs-target="#invoices_preview"><i class="fa fa-print"></i> Print </a>
-                                            
+                                            <a class="btn btn-outline-danger me-2" href="#" data-bs-toggle="modal" data-bs-target="#generateModal" id="btn-add-bank-details"><i class="fas fa-plus-circle me-2"></i>Generate TOS</a>
+                                            <a class="btn btn-outline-danger" href="#" onclick="window.print();"><i class="fa fa-print"></i> Print </a>
                                         </div>
                                     </form>
                                 </div>
@@ -66,10 +66,10 @@
                                     <p class="SPECIFICATIONS">TABLE OF SPECIFICATIONS</p>
                                     <p class="assessment">
                                         @if(isset($TOSinfo) && count($TOSinfo) > 0)
-    @php
-        $examinationType = $TOSinfo->first()->examination_type;
-    @endphp
-@endif
+                                            @php
+                                                $examinationType = $TOSinfo->first()->examination_type;
+                                            @endphp
+                                        @endif
                                         
                                         @if(isset($examinationType))
                                         {{ $examinationType }}
@@ -103,7 +103,7 @@
                             <table class="add-table-items">
                                 <thead>
                                     <tr>
-                                        <th rowspan="2" width="100%">TOPIC</th>
+                                        <th rowspan="2">TOPIC</th>
                                         <th colspan="2">No. of Hours</th>
                                         <th rowspan="2">Weight (%)</th>
                                         <th rowspan="2">Remembering</th>
@@ -171,8 +171,6 @@
                                         </th>
                                     </tr>
                                 </thead>
-                          
-
                             </table>
                             <div class="signature-section">
                                 <table>
@@ -213,19 +211,16 @@
                                     </thead>
                                     <tbody class="tbody-signature">
                                         <td>
-
                                             <p>
                                                 <span> A* - No. of hours the topic was covered in class </span>
                                                 <br>
                                                 <span> * - No. of hours allotted to answer the test item/s </span>
                                                 <br>
                                                 <span>**Weight (%) = (no. of points for a given topic /total no. of points) * 100</span>
-
-                                              </p>
+                                            </p>
                                         </td>
                                     </tbody>
                                 </table>
-                                <div></div>
                             </div>
                         </div>
                     </div>
@@ -235,47 +230,44 @@
     </div>
 </div>
 
-
-<div class="modal custom-modal fade bank-details" id="bank_details" role="dialog">
+<!-- Modal for Generating TOS and Exam Type -->
+<div class="modal custom-modal fade" id="generateModal" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="form-header text-start mb-0">
-                    <h4 class="mb-0">Add Topic</h4>
+                    <h4 class="mb-0">Generate Table of Specification</h4>
                 </div>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="topicForm" method="POST" action="{{ route('save_topic') }}">
+                <form id="generateForm" method="POST" action="{{ route('save_topic') }}">
                     @csrf
                     <div class="bank-inner-details">
                         <div>
                             @if(isset($courseInfo))
-                            <input type="hidden" name="course_code" value="{{ $courseInfo->course_code}}">
+                            <input type="hidden" name="course_code" value="{{ $courseInfo->course_code }}">
                             @endif
                             <div class="row">
                                 <div class="col-lg-7 col-md-8">
-
                                     <div class="form-group">
-                                <label>Assesment</label>
-                                <select name="assessment_type" class="form-select form-control topic-select">
-                                    <option value="" disabled selected>Select Assessment Type</option>
-                                    <option>MIDTERM EXAMINATION</option>
-                                    <option>FINAL EXAMINATION</option>
-                                </select>
-                            </div>
-                            </div>                            
-                            <div class="col-lg-5 col-md-5">
-                                <div class="form-group">
-                                    <label>Total Item</label>
-                                    <input type="number" id="totalItems" class="form-control" name="overall_points" placeholder="Overall total points" required>
+                                        <label>Assessment</label>
+                                        <select name="assessment_type" class="form-select form-control topic-select">
+                                            <option value="" disabled selected>Select Assessment Type</option>
+                                            <option>MIDTERM EXAMINATION</option>
+                                            <option>FINAL EXAMINATION</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5 col-md-5">
+                                    <div class="form-group">
+                                        <label>Total Item</label>
+                                        <input type="number" id="totalItems" class="form-control" name="overall_points" placeholder="Overall total points" required>
+                                    </div>
                                 </div>
                             </div>
-
-                            </div>
-                           
                         </div>
                         <div id="topicContainer">
                             <div class="row topicRow">
@@ -299,29 +291,28 @@
                                 <div class="col-lg-5 col-md-3">
                                     <label>Action</label>
                                     <div>
-                                        <a class="btn btn-outline-danger addTopicButton"><i class="fas fa-plus-circle me-2"></i>Add Topic </a>
-                                        <a class="btn btn-outline-danger removeTopicButton"><i class="fe fe-trash-2 me-2"></i>Remove </a>
+                                        <a class="btn btn-outline-danger addTopicButton"><i class="fas fa-plus-circle me-2"></i>Add Topic</a>
+                                        <a class="btn btn-outline-danger removeTopicButton"><i class="fe fe-trash-2 me-2"></i>Remove</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                   
                     <div class="modal-footer">
                         <div class="">
-                            <a  data-bs-dismiss="modal" class="btn btn-outline-danger me-2">Cancel</a>
-                            <button type="submit" class="btn btn-outline-danger me-2" name="save-tos" id="save-tos">Save</button>
+                            <a data-bs-dismiss="modal" class="btn btn-outline-danger me-2">Cancel</a>
+                            <button type="submit" class="btn btn-outline-danger me-2" id="save-tos">Generate</button>
                         </div>
                     </div>
                 </form>
+   
             </div>
         </div>
     </div>
 </div>
 
-
-
 <script>
-
 document.addEventListener('DOMContentLoaded', function() {
     // Add Topic Button
     document.getElementById('topicContainer').addEventListener('click', function(event) {
@@ -391,10 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-
-
 </script>
-
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -420,8 +408,6 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function () {
             loader.style.display = 'block';
         });
-
-        
     });
 </script>
 @endsection

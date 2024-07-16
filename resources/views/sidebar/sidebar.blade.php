@@ -158,12 +158,20 @@
                         <span>Course Material</span>
                     </a>
                 </li>
-                <li class="{{ set_active(['exam']) }}">
-                    <a href="{{ route('exam') }}">
-                        <i class="fas fa-clipboard-list"></i> 
-                        <span>Exam</span>
+
+                <li class="submenu {{ set_active(['generate-exam-type-table', 'exam']) }} {{ (request()->is('examtype')) ? 'active' : '' }} {{ (request()->is('exam')) ? 'active' : '' }}">
+                    <a href="#"><i class="fas fa-clipboard-list"></i>
+                        <span> Exam</span>
+                        <span class="menu-arrow"></span>
                     </a>
+                    <ul>
+                        <li><a  href="{{ route('examtype') }}" class="{{ set_active(['examtype']) }}">Exam Type Classification</a></li>
+                        <li><a  href="{{ route('exam') }}" class="{{ set_active(['exam']) }}">Exam Generation</a></li>
+                    </ul>
                 </li>
+                
+
+                
                 <li class="submenu {{set_active(['student/list','student/grid','student/add/page'])}} {{ (request()->is('student/edit/*')) ? 'active' : '' }} {{ (request()->is('student/profile/*')) ? 'active' : '' }}">
                     <a href="#"><i class="fas fa-graduation-cap"></i>
                         <span> Students</span>
